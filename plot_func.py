@@ -12,8 +12,8 @@ from globalVar import *
 
 # def plot_learning_curve():
 def ML_JH_zircon_plot():
-    df_ml_jh_plot = pd.read_excel("Dataset Final1101.xlsx", sheet_name='Sheet 1')
-    df_ml_jh_plot.columns
+    df_ml_jh_plot = pd.read_excel(dataPath + "Dataset Final1101.xlsx", sheet_name='Sheet 1')
+    #df_ml_jh_plot.columns
     ml_ziron_type = [
         'S-type zircon',
         'I-type zircon'
@@ -52,12 +52,12 @@ def ML_JH_zircon_plot():
     ax.tick_params(axis="y", direction="in")
     ax.tick_params(axis="x", direction="in")
 
-    plt.savefig('ML_JH_stacked_hist.pdf', transparent=True)
+    plt.savefig(figPath + 'ML_JH_stacked_hist.pdf', transparent=True)
     plt.show()
 
 
 def ML_Qinghai_Tibet_Plateau_Zircon_PLOT():
-    df_ml_qtp_plot = pd.read_excel('Dataset Final1101.xlsx', sheet_name='Sheet 2')
+    df_ml_qtp_plot = pd.read_excel(dataPath + 'Dataset Final1101.xlsx', sheet_name='Sheet 2')
     bins = range(0, 150, 10)
 
     x1 = list(df_ml_qtp_plot[df_ml_qtp_plot['Machine learning type '] == 'S-type zircon']['Age（Ma)'])
@@ -85,12 +85,12 @@ def ML_Qinghai_Tibet_Plateau_Zircon_PLOT():
     ax.tick_params(axis="y", direction="in")
     ax.tick_params(axis="x", direction="in")
 
-    plt.savefig('ML_QTP_stacked_hist.pdf', transparent=True)
+    plt.savefig(figPath + 'ML_QTP_stacked_hist.pdf', transparent=True)
     plt.show()
 
 
 def JH_element_vs_element_plot(element1, element2):
-    JH_zircons = pd.read_excel('Dataset Final1101.xlsx', sheet_name='Sheet 3')
+    JH_zircons = pd.read_excel(dataPath + 'Dataset Final1101.xlsx', sheet_name='Sheet 3')
     type_list = [
         'I*',
         'I-type zircon',
@@ -111,23 +111,23 @@ def JH_element_vs_element_plot(element1, element2):
     ]
     for t, c1, c2 in zip(type_list, colors, facecolors):
         plt.scatter(
-            JH_zircons[JH_zircons["zircon "] == t]["Hf (mol%)"],
-            JH_zircons[JH_zircons["zircon "] == t]["P (mol%)"],
-            s=JH_zircons[JH_zircons["zircon "] == t]["P (μmol/g)"],
+            JH_zircons[JH_zircons["zircon "] == t][str(element1)+" (mol%)"],
+            JH_zircons[JH_zircons["zircon "] == t][str(element2)+" (mol%)"],
+            s=JH_zircons[JH_zircons["zircon "] == t][str(element1)+" (μmol/g)"],
             facecolors=c2,
             edgecolors=c1,
-            #         alpha=0.8,
+            #alpha=0.8,
             label=t
         )
-    plt.legend()
+    lgnd = plt.legend()
     for handle in lgnd.legendHandles:
         handle.set_sizes([48.0])
 
     plt.xlim(20, 100)
     plt.ylim(0, 40)
-    plt.xlabel('Hf (mol%)', fontsize=13)
-    plt.ylabel('P (mol%)', fontsize=13)
-    plt.savefig('JH_P vs Hf.eps')
+    plt.xlabel(str(element1)+' (mol%)', fontsize=13)
+    plt.ylabel(str(element2)+' (mol%)', fontsize=13)
+    plt.savefig(figPath + "JH_"+str(element1)+" vs "+str(element2)+".eps")
 
 
 def plot_predict_one(figpath, fig, title, pred_, filename, test_count, raw_num, col_num, count, max_x, max_y):
