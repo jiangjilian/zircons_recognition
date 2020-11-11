@@ -152,19 +152,19 @@ def plot_predict_one(figpath, fig, title, pred_, filename, test_count, raw_num, 
     # 深蓝色#4A708B
     # 暗红色#8B2323
 
-    # 绘制4条直线
+    # Plot distribution zone of S-type zircons
     x = np.arange(0.0, max_x, 0.01)
     f1 = x - 7.33  # S下界限
     f2 = x + 5.64  # S上界限
     # f3 = 3.10 * x #I的上界限
     f4 = x
-    # 红色
+    # Red
     plt.plot(x, f1, color="#B22222", linewidth=2, linestyle="--")
-    # 绿色
+    # Green
     plt.plot(x, f2, color="#2E8B57", linewidth=2, linestyle="--")
-    # 蓝色
+    # Blue
     # plt.plot(x, f3,color = "#5CACEE",linewidth=2, linestyle="--")
-    # 灰色
+    # Grey
     plt.plot(x, f4, color="#ADADAD", linewidth=2, linestyle="--")
     plt.xlim(0, max_x)
     plt.ylim(0, max_y)
@@ -197,4 +197,4 @@ def plot_predict(predict_data, test_count, estimators, xlim, ylim):
     fig2.subplots_adjust(wspace=0.3, hspace=0.2)
 
     # fig2.savefig(figPath + test_count + "SC_HMM_LOOCV" + "_all_predic_four_models_seeds.svg")
-    fig2.savefig(figPath + test_count + "SC_HMM_LOOCV" + "_all_predict_four_models_seeds.jpg")
+    fig2.savefig(figPath + "four_models_prediction.jpg")

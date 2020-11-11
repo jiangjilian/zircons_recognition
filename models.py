@@ -220,10 +220,10 @@ def RF(x_train, x_test, y_train, y_test, pred_data, test_data, train_data, **kw)
     ##pred_x = preprocess_data(pred_x)
     # print(kw)
     TREE_NUM = int(kw["TREE_NUM"])
-    # MAX_LEAF_NODE = kw["MAX_LEAF_NODE"]
+    MAX_LEAF_NODE = kw["MAX_LEAF_NODE"]
     clf = RandomForestClassifier(n_estimators=TREE_NUM,
                                  oob_score=True,
-                                 # max_leaf_nodes=MAX_LEAF_NODE,
+                                 max_leaf_nodes=MAX_LEAF_NODE,
                                  random_state=789)
 
     # print(x_train)
