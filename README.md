@@ -1,4 +1,4 @@
-"# zircons_recognition" 
+# zircons_recognition
 
 This project contains PYTHON codes for the following paper. Please consider citing the paper if you find it of any help.
 1. Please start with main file: "main_rateVsSpeed.m", reproducing Fig. 5 in the paper.
