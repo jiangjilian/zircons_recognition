@@ -15,7 +15,7 @@ def train(estimators, estimators_txt, parameters, raw_data, train_set, test_set,
     X_train, y_train, train_set = shuffle(X_train, y_train, train_set)
 
     # sample_weight_input2 = np.array(train_set["sample_weight2"])
-
+    all_prediction_data = raw_data
     for i in np.arange(len(estimators)):
         print(estimators_txt[i])
         # Record Parameters into acc
@@ -35,17 +35,18 @@ def train(estimators, estimators_txt, parameters, raw_data, train_set, test_set,
         predict_data_pred.to_csv(outputPath + str(estimators_txt[i]) + "_predictData_predict_result.csv")
         test_data_pred.to_csv(outputPath + str(estimators_txt[i]) + "_testData_predict_result.csv")
         all_prediction = pd.concat([predict_data_pred, test_data_pred], ignore_index=True, axis=0)
-        all_prediction_data = pd.merge(raw_data, all_prediction[["No", "pred_type"]], on=["No"], how="outer",
+        all_prediction_data = all_prediction_data.merge(all_prediction[["No", "pred_type"]], on=["No"], how="outer",
                                        suffixes=("", "_" + estimators_txt[i]))
 
         JH_pred_type = predict_data_pred.loc[predict_data_pred["Rock type"] == "JH zircon", "pred_type"]
         JH_S_ratio = JH_pred_type.value_counts()[1] / (JH_pred_type.value_counts()[0] + JH_pred_type.value_counts()[1])
         acc.loc[i, "JH_S_ratio"] = JH_S_ratio
-        Tb_pred_type = predict_data_pred.loc[predict_data_pred["Rock type"] == "detrital zircon (<150Ma)", "pred_type"]
-        Tb_S_ratio = Tb_pred_type.value_counts()[1] / (Tb_pred_type.value_counts()[0] + Tb_pred_type.value_counts()[1])
-        acc.loc[i, "Tb_S_ratio"] = Tb_S_ratio
+        # Tb_pred_type = predict_data_pred.loc[predict_data_pred["Rock type"] == "detrital zircon (<150Ma)", "pred_type"]
+        # Tb_S_ratio = Tb_pred_type.value_counts()[1] / (Tb_pred_type.value_counts()[0] + Tb_pred_type.value_counts()[1])
+        # acc.loc[i, "Tb_S_ratio"] = Tb_S_ratio
 
     acc.to_csv(outputPath + "four_methods_acc.csv")
-    all_prediction_data.to_csv(dataPath + fileName + "_prediction.csv")
+    all_prediction_data.to_csv(dataPath + fileName + "_prediction.csv", index=False)
     print(acc)
+    print(all_prediction_data.columns)
 # def evaluate():

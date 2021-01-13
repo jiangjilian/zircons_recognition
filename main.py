@@ -13,15 +13,15 @@ from train import *
 
 if __name__ == '__main__':
     # Load data
-    # fileName = "Dataset Final 1026"
+    # fileName = "Data Final 1208"
     zircons_data = pd.read_excel(dataPath + fileName + ".xlsx")
     zircons_data.loc[zircons_data["zircon"] == "S-type zircon", "label"] = 1
     zircons_data.loc[zircons_data["zircon"] == "I-type zircon", "label"] = 0
     cols = [x for x in zircons_data.index for i in elements if zircons_data.loc[x, i] == 0]
     zircons_data.drop(cols, inplace=True)
     zircons_data.reset_index(inplace=True, drop=True)
-    ree_list = ["Y", "Ce", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb", "Lu"]
-    zircons_data["REE+Y"] = zircons_data[ree_list].sum(axis=1)
+    # ree_list = ["Y", "Ce", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb", "Lu"]
+    # zircons_data["REE+Y"] = zircons_data[ree_list].sum(axis=1)
     zircons_data.dropna(subset=elements, inplace=True)
     zircons_data.reset_index(inplace=True, drop=True)
     raw_prediction_set = zircons_data[zircons_data["Set"] == "Prediction set"]

@@ -8,5 +8,6 @@ dataPath = ".\\data\\"
 figPath = ".\\fig\\"
 
 elements = ['P', 'Y', 'Ce', 'Sm', 'Eu', 'Dy', 'Lu', 'Hf', 'Th', 'U']
-info_list = ['No', 'Set', 'zircon', 'Sample ID', 'Rock type', 'Age(Ma)', "REE+Y", "label"]
-fileName = "Dataset Final 1026"
+# info_list = ['No', 'Set', 'zircon', 'Sample ID', 'Rock type', 'Age(Ma)', "REE+Y", "label"]
+info_list = ['No', 'Set', 'zircon', 'Sample ID', 'Rock type', 'Age(Ma)', "label"]
+fileName = "Data Final 20210101"

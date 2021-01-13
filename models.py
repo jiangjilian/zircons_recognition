@@ -121,7 +121,8 @@ class TSVM(SVC):
 
 
 def get_weight_list(train_set, WEIGHT):
-    weighted_spot = train_set[(train_set["P_copy"] <= 20) & (train_set["REE+Y"] <= 20)].index
+    weighted_spot = train_set[(train_set["P_copy"] <= 20)].index
+    # & (train_set["REE+Y"] <= 20)
 
     sample_weight = np.ones(len(train_set))
 
