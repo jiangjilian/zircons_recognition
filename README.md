@@ -14,6 +14,7 @@ git clone https://github.com/jiangjilian/zircons_recognition.git
 ```
 Then, to install dependent libraries for our project,run
 ```
+cd zircons_recognition
 pip install -r requirements.txt
 ```
 And then, run the main.py to obtain prediction results and our figures.
