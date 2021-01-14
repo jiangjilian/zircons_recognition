@@ -7,7 +7,7 @@ This project contains PYTHON codes for the following paper. Please consider citi
 4. Models include SVM,WSVM,TSVM and RF. TSVM is selected as our working model for its best performance.
 
 # Running the project 
-**in terminal for Ubuntu or command-line interface for windows**
+## in terminal for Ubuntu or command-line interface for windows
 Firstly, clone this project.
 ```
 git clone https://github.com/jiangjilian/zircons_recognition.git
@@ -20,6 +20,6 @@ And then, run the main.py to obtain prediction results and our figures.
 ```
 python main.py
 ```
-**in Pycharm**
+## in Pycharm
 Install all dependent libraries and directly run main.py
   
