@@ -6,8 +6,9 @@ Created on Sun Aug  2 21:21:02 2020
 """
 
 from utils.normlization import *
-# from plot_func import *
+from plot_func import *
 from train import *
+
 #import numba
 #@numba.jit
 
@@ -63,7 +64,17 @@ if __name__ == '__main__':
     train(estimators, estimators_txt, parameters, zircons_data, train_set, test_set, raw_prediction_set, predict_set)
 
     # Plot fig1, fig2 and fig 3 in this paper
+    #fig1
+    ree_boxplot()
 
+    #fig2
+    ML_JH_zircon_P_or_Ree_Hf_plot()
+
+    #fig3 a
+    ALL_ZIRCONS_P_VS_AGE()
+
+    #fig3 b
+    ML_JH_zircon_hist_plot()
 
 
 

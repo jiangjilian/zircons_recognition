@@ -1,200 +1,258 @@
 import os
-
 import math
 import numpy as np
 import pandas as pd
+import matplotlib
+import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import matplotlib.ticker as plticker
+# import matplotlib.patches as mpatches
+# import seaborn as sns
+
 from globalVar import *
-#import seaborn as sns
-#import matplotlib.patches as mpatches
 
 
-# def plot_learning_curve():
-def ML_JH_zircon_plot():
-    df_ml_jh_plot = pd.read_excel(dataPath + "Dataset Final1101.xlsx", sheet_name='Sheet 1')
-    #df_ml_jh_plot.columns
-    ml_ziron_type = [
-        'S-type zircon',
-        'I-type zircon'
+def ree_boxplot():
+    element_list = [
+        'Hf', 'Y', 'P', 'U', 'Th', 'Lu', 'Yb', 'Tm', 'Er', 'Ho', 'Dy', 'Tb', 'Gd', 'Eu', 'Sm', 'Nd', 'Pr',
+        'Ce', 'La', 'Ti', 'Nb', 'Ta', 'Pb', 'Fe', 'Ca', 'Sc', 'Li', 'Sr', 'B', 'Rb'
     ]
-
-    colors_JH = [
-        'steelblue',
-        'red'
-    ]
-    loc = plticker.MultipleLocator(base=200.0)  # this locator puts ticks at regular intervals
-
-    bins = range(3300, 4400, 50)
-
-    x1 = list(df_ml_jh_plot[df_ml_jh_plot['Machine learning type '] == 'S-type zircon']['Age（Ma)'])
-    x2 = list(df_ml_jh_plot[df_ml_jh_plot['Machine learning type '] == 'I-type zircon']['Age（Ma)'])
-    f, ax = plt.subplots()
-    plt.hist(
-        [x1, x2],
-        bins=bins,
-        stacked=True,
-        #     normed=True,
-        color=colors_JH,
-        alpha=0.5,
-        edgecolor="w",
-        linewidth=1,
-        label=ml_ziron_type
+    # read zircon data
+    df_zircon = pd.read_excel(dataPath + "zircon_dataset.xlsx", sheet_name='Sheet1')
+    # read n/N data (Extended Data Table 1)
+    df_n_percent = pd.read_excel(dataPath + 'data_count_percent.xlsx')
+    bar_color_index = df_n_percent[element_list].iloc[0, :].values
+    fig_box_data = np.log10(df_zircon[element_list])
+    # exclude the highest and lowest 20% of values of each element to reduce scatter
+    low, high = fig_box_data.quantile([.2, .8]).values
+    data_plot = []
+    for i in range(len(element_list)):
+        data_plot.append(
+            fig_box_data[(fig_box_data[fig_box_data.columns[i]] < high[i]) & (
+                    fig_box_data[fig_box_data.columns[i]] > low[i])].iloc[:, i].values
+        )
+    df = pd.DataFrame(data_plot).T
+    df.columns = element_list
+    df_test = pd.DataFrame(data=list(df['Hf'].dropna()), columns=['Data'])
+    df_test['ID'] = 'Hf'
+    df_test['n%'] = bar_color_index[0]
+    for i in range(1, len(element_list)):
+        label = element_list[i]
+        df_t = pd.DataFrame(data=list(df[label].dropna()), columns=['Data'])
+        df_t['ID'] = label
+        df_t['n%'] = bar_color_index[i]
+        df_test = pd.concat([df_test, df_t])
+    # box plot
+    cmap_name = 'RdBu'
+    rb_cm = cm.get_cmap(cmap_name)
+    norm = matplotlib.colors.Normalize(vmin=0, vmax=1.2)
+    ## create a scalarmappable from the colormap
+    sm = matplotlib.cm.ScalarMappable(cmap=rb_cm, norm=norm)
+    sm.set_array([])
+    flierprops = dict(marker='o', markerfacecolor='g', markersize=0.5, linestyle='none')
+    medianprops = dict(linestyle='--', linewidth=.5, color='k')
+    boxprops = dict(linestyle='-', linewidth=0, color='darkgoldenrod')
+    fig, ax = plt.subplots(figsize=(16, 6))
+    box1 = plt.boxplot(
+        data_plot,
+        labels=element_list,
+        flierprops=flierprops,
+        medianprops=medianprops,
+        boxprops=boxprops,
+        patch_artist=True
     )
+    for patch, i in zip(box1['boxes'], range(len(element_list))):
+        patch.set_facecolor(
+            rb_cm(norm(bar_color_index[i]))
+        )
+    plt.xticks(size=12)
+    plt.ylabel('Content (' + r'$\mu$' + 'mol/g)', size=15)
+    plt.ylim(-4.5, 2.5)
+    y = list(range(-4, 3))
+    plt.yticks(
+        y,
+        [r'$10^{-4}$', r'$10^{-3}$', r'$10^{-2}$', r'$10^{-1}$', r'$10^{0}$', r'$10^{1}$', r'$10^{2}$']
+    )
+    # plot color bar
+    cbaxes = fig.add_axes([0.45, 0.8, 0.2, 0.05])
+    cbar = ax.figure.colorbar(
+        sm,
+        cax=cbaxes,
 
-    plt.legend(loc='upper left')
-    plt.xlabel('Age(Ma)', fontsize=13)
-    plt.ylabel('Frequency', fontsize=13)
-    ax.xaxis.set_major_locator(loc)
-    ax.yaxis.set_major_locator(plticker.MultipleLocator(base=5))
-    plt.xlim(3300, 4400)
-    # plt.ylim(0, 20)
-    ax.tick_params(axis="y", direction="in")
-    ax.tick_params(axis="x", direction="in")
-
-    plt.savefig(figPath + 'ML_JH_stacked_hist.pdf', transparent=True)
+        ticks=list(np.arange(0, 1.2, 0.2)),
+        orientation='horizontal',
+    )
+    cbar.set_label(label='Trace element availability(%)', size=15)
+    if not os.path.exists(figPath):
+        os.makedirs(figPath)
+    plt.savefig(figPath + "trace_elements_content_boxplot.png")
     plt.show()
 
 
-def ML_Qinghai_Tibet_Plateau_Zircon_PLOT():
-    df_ml_qtp_plot = pd.read_excel(dataPath + 'Dataset Final1101.xlsx', sheet_name='Sheet 2')
-    bins = range(0, 150, 10)
+def ML_JH_zircon_P_or_Ree_Hf_plot():
+    # ## JH_P(REE+Y) vs Hf_plot
+    df_JH_plot = pd.read_excel(dataPath + 'Dataset 0104_plot.xlsx', sheet_name='Sheet 2')
 
-    x1 = list(df_ml_qtp_plot[df_ml_qtp_plot['Machine learning type '] == 'S-type zircon']['Age（Ma)'])
-    x2 = list(df_ml_qtp_plot[df_ml_qtp_plot['Machine learning type '] == 'I-type zircon']['Age（Ma)'])
-    f, ax = plt.subplots()
-    plt.hist(
-        [x1, x2],
-        bins=bins,
-        stacked=True,
-        #     normed=True,
-        color=colors_JH,
-        alpha=0.5,
-        edgecolor="w",
-        linewidth=1,
-        label=ml_ziron_type
-    )
-
-    plt.legend(loc='upper left')
-    plt.xlabel('Age(Ma)', fontsize=13)
-    plt.ylabel('Frequency', fontsize=13)
-    # ax.xaxis.set_major_locator(loc)
-    ax.yaxis.set_major_locator(plticker.MultipleLocator(base=30))
-    plt.xlim(0, 150)
-    # plt.ylim(0, 20)
-    ax.tick_params(axis="y", direction="in")
-    ax.tick_params(axis="x", direction="in")
-
-    plt.savefig(figPath + 'ML_QTP_stacked_hist.pdf', transparent=True)
-    plt.show()
-
-
-def JH_element_vs_element_plot(element1, element2):
-    JH_zircons = pd.read_excel(dataPath + 'Dataset Final1101.xlsx', sheet_name='Sheet 3')
     type_list = [
         'I*',
         'I-type zircon',
         'S*',
         'S-type zircon',
+        'TTG zircon'
     ]
     colors = [
         'red',
         'red',
         'steelblue',
         'steelblue',
+        'g'
     ]
     facecolors = [
         'none',
         'red',
         'none',
         'steelblue',
+        'none'
     ]
+    f, ax = plt.subplots(figsize=(4, 3))
     for t, c1, c2 in zip(type_list, colors, facecolors):
         plt.scatter(
-            JH_zircons[JH_zircons["zircon "] == t][str(element1)+" (mol%)"],
-            JH_zircons[JH_zircons["zircon "] == t][str(element2)+" (mol%)"],
-            s=JH_zircons[JH_zircons["zircon "] == t][str(element1)+" (μmol/g)"],
+            df_JH_plot[df_JH_plot["zircon "] == t]["Hf (mol%)"],
+            df_JH_plot[df_JH_plot["zircon "] == t]["P (mol%)"],
+            s=df_JH_plot[df_JH_plot["zircon "] == t]["P (μmol/g)"],
             facecolors=c2,
             edgecolors=c1,
-            #alpha=0.8,
+            linewidth=0.5,
+            #         alpha=0.8,
             label=t
         )
-    lgnd = plt.legend()
+    lgnd = plt.legend(fontsize=8)
     for handle in lgnd.legendHandles:
-        handle.set_sizes([48.0])
+        handle.set_sizes([10])
 
     plt.xlim(20, 100)
     plt.ylim(0, 40)
-    plt.xlabel(str(element1)+' (mol%)', fontsize=13)
-    plt.ylabel(str(element2)+' (mol%)', fontsize=13)
-    plt.savefig(figPath + "JH_"+str(element1)+" vs "+str(element2)+".eps")
+    ax.yaxis.set_major_locator(plticker.MultipleLocator(base=10))
+    ax.tick_params(axis="y", direction="in")
+    ax.tick_params(axis="x", direction="in")
+    plt.xlabel('Hf (mol%)', fontsize=13)
+    plt.ylabel('P (mol%)', fontsize=13)
+    # plt.tight_layout()
+    plt.savefig(figPath + 'JH_P vs Hf0104.png')
+    plt.show()
+
+    f, ax = plt.subplots(figsize=(4, 3))
+    for t, c1, c2 in zip(type_list, colors, facecolors):
+        sc = plt.scatter(
+            df_JH_plot[df_JH_plot["zircon "] == t]["Hf (mol%)"],
+            df_JH_plot[df_JH_plot["zircon "] == t]["(REE+Y)3+ (mol%)"],
+            s=df_JH_plot[df_JH_plot["zircon "] == t]["P (μmol/g)"],
+            facecolors=c2,
+            edgecolors=c1,
+            linewidth=0.5,
+            #            alpha=0.8,
+            label=t
+        )
+    b1 = plt.scatter([], [], s=15, marker='o', facecolors='none', edgecolors='steelblue', linewidth=0.5)
+    b2 = plt.scatter([], [], s=30, marker='o', facecolors='none', edgecolors='steelblue', linewidth=0.5)
+    b3 = plt.scatter([], [], s=45, marker='o', facecolors='none', edgecolors='steelblue', linewidth=0.5)
+    b4 = plt.scatter([], [], s=60, marker='o', facecolors='none', edgecolors='steelblue', linewidth=0.5)
+    plt.legend((b1, b2, b3, b4),
+               ('15 μmol/g', '30 μmol/g', '45 μmol/g', '60 μmol/g'),
+               scatterpoints=1,
+               loc='upper right',
+               ncol=1,
+               fontsize=8)
+    plt.xlim(20, 100)
+    plt.ylim(0, 50)
+    ax.yaxis.set_major_locator(plticker.MultipleLocator(base=10))
+    ax.tick_params(axis="y", direction="in")
+    ax.tick_params(axis="x", direction="in")
+    plt.xlabel('Hf (mol%)', fontsize=13)
+    plt.ylabel('(REE+Y)3+ (mol%)', fontsize=13)
+    # plt.tight_layout()
+    plt.savefig(figPath + 'JH_REE vs Hf0104.png')
+    plt.show()
 
 
-def plot_predict_one(figpath, fig, title, pred_, filename, test_count, raw_num, col_num, count, max_x, max_y):
-    # fig2 = plt.figure(figsize=(16,12))
-    # ax = fig2.add_subplot(111)
-    ax = plt.subplot(raw_num, col_num, count)
-    ax.spines['left'].set_color('black')
-    ax.spines['right'].set_color('black')
-    ax.spines['top'].set_color('black')
-    ax.spines['bottom'].set_color('black')
-    ax.spines['left'].set_linewidth(3)
-    ax.spines['right'].set_linewidth(3)
-    ax.spines['top'].set_linewidth(3)
-    ax.spines['bottom'].set_linewidth(3)
-    ax.tick_params(direction='out', length=15, width=2, colors='black', grid_color='b', pad=10)
-    # cm = plt.cm.get_cmap('RdYlBu')
-    # I型绿色，S型红色 {"I_type":'#3CC9CF',"S_type":'#F2766E'}
-    plt.scatter(pred_.loc[pred_["pred_type"] == 0, "P_copy"], pred_.loc[pred_["pred_type"] == 0, "REE+Y"], c="#3CC9CF",
-                marker='o', s=800, alpha=1, label="Predicted I-type")
-    plt.scatter(pred_.loc[pred_["pred_type"] == 1, "P_copy"], pred_.loc[pred_["pred_type"] == 1, "REE+Y"], c="#F2766E",
-                marker='o', s=800, alpha=1, label="Predicted S-type")
-    # 深蓝色#4A708B
-    # 暗红色#8B2323
+def ALL_ZIRCONS_P_VS_AGE():
+    # ## Age vs P
+    df_age_plot = pd.read_excel(dataPath + 'Dataset 0104_plot.xlsx', sheet_name='Sheet 3')
+    ziron_type = [
+        'S-type zircon',
+        'I-type zircon'
+    ]
 
-    # Plot distribution zone of S-type zircons
-    x = np.arange(0.0, max_x, 0.01)
-    f1 = x - 7.33  # S下界限
-    f2 = x + 5.64  # S上界限
-    # f3 = 3.10 * x #I的上界限
-    f4 = x
-    # Red
-    plt.plot(x, f1, color="#B22222", linewidth=2, linestyle="--")
-    # Green
-    plt.plot(x, f2, color="#2E8B57", linewidth=2, linestyle="--")
-    # Blue
-    # plt.plot(x, f3,color = "#5CACEE",linewidth=2, linestyle="--")
-    # Grey
-    plt.plot(x, f4, color="#ADADAD", linewidth=2, linestyle="--")
-    plt.xlim(0, max_x)
-    plt.ylim(0, max_y)
-    plt.xlabel("P(μmol/g)", fontsize=40, labelpad=10, weight='normal')
-    plt.ylabel("REE+Y(μmol/g)", fontsize=40, labelpad=10, weight='normal')
-    plt.xticks(fontsize=35, color='black')
-    plt.yticks(fontsize=35, color='black')
-    plt.legend(loc="best", fontsize=35)
-    plt.title(title, fontsize=45)
-    plt.tight_layout()
-    return plt
+    colors = [
+        'steelblue',
+        'red'
+    ]
+    f, ax = plt.subplots(figsize=(4, 3))
+    for t, c in zip(ziron_type, colors):
+        plt.scatter(
+            df_age_plot[df_age_plot["Type"] == t]["Age"] / 1000,
+            df_age_plot[df_age_plot["Type"] == t]["P (μmol/g)"],
+            s=10,
+            facecolors="none",
+            edgecolors=c,
+            linewidth=0.5,
+            #         alpha=0.8,
+            label=t,
+            clip_on=False,
+            zorder=10,
+        )
+    lgnd = plt.legend()
+    for handle in lgnd.legendHandles:
+        handle.set_sizes([10.0])
+    plt.xlim(0, 4.5)
+    plt.ylim(0, 70)
+    ax.tick_params(axis="y", direction="in")
+    ax.tick_params(axis="x", direction="in")
+    ax.xaxis.set_major_locator(plticker.MultipleLocator(base=0.5))
+    ax.yaxis.set_major_locator(plticker.MultipleLocator(base=10))
+    plt.xlabel('Age (Ga)', fontsize=13)
+    plt.ylabel('P (μmol/g)', fontsize=13)
+    # plt.tight_layout()
+    plt.savefig(figPath + 'Age vs P.png')
+    plt.show()
 
 
-def plot_predict(predict_data, test_count, estimators, xlim, ylim):
-    fig = plt.figure(figsize=(38, 28))
-    raw_num, col_num = 2, 2
-    fig.subplots_adjust(wspace=0.3, hspace=0.2)
-    if not os.path.exists(figPath):
-        os.makedirs(figPath)
-    # fig.savefig(figPath + test_count + "_all_predict_four_models_seeds.svg")
-    fig.savefig(figPath + test_count + "_all_predict_four_models_seeds.jpg")
+def ML_JH_zircon_hist_plot():
+    df_ml_jh_plot = pd.read_excel(dataPath + "Dataset 0104_plot.xlsx", sheet_name='Sheet 1')
+    ml_ziron_type = [
+        'S-type zircon',
+        'I-type zircon'
+    ]
+    colors_JH = [
+        'steelblue',
+        'red'
+    ]
+    loc = plticker.MultipleLocator(base=200.0)  # this locator puts ticks at regular intervals
+    bins = range(3000, 4450, 50)
 
-    fig2 = plt.figure(figsize=(38, 28))
-    for j in np.arange(len(estimators)):
-        test_data = pd.read_csv(outputPath + str(col[j]) + test_count + "_testData_predict_result.csv", sep=',',
-                                engine='python')
-        plt = plot_predict_one(figPath + str(col[j]) + "\\", fig2, col[j], test_data,
-                               col[j] + "_test_data_" + "_seed_" + str(2), "compare", raw_num, col_num, j + 1, xlim,
-                               ylim)
-    fig2.subplots_adjust(wspace=0.3, hspace=0.2)
+    x1 = list(df_ml_jh_plot[df_ml_jh_plot['Machine learning type '] == 'S-type zircon']['Age（Ma)'])
+    x2 = list(df_ml_jh_plot[df_ml_jh_plot['Machine learning type '] == 'I-type zircon']['Age（Ma)'])
+    f, ax = plt.subplots(figsize=(4, 3))
+    plt.hist(
+        [x1, x2],
+        bins=bins,
+        stacked=True,
+        #     normed=True,
+        color=colors_JH,
+        #     alpha=0.5,
+        edgecolor="w",
+        linewidth=0.3,
+        label=ml_ziron_type
+    )
 
-    # fig2.savefig(figPath + test_count + "SC_HMM_LOOCV" + "_all_predic_four_models_seeds.svg")
-    fig2.savefig(figPath + "four_models_prediction.jpg")
+    plt.legend(loc='upper right')
+    plt.xlabel('Age(Ma)', fontsize=13)
+    plt.ylabel('Frequency', fontsize=13)
+    ax.xaxis.set_major_locator(loc)
+    ax.yaxis.set_major_locator(plticker.MultipleLocator(base=20))
+    plt.xlim(3000, 4400)
+    ax.tick_params(axis="y", direction="in")
+    ax.tick_params(axis="x", direction="in")
+    # plt.tight_layout()
+    plt.savefig(figPath + 'ML_JH_stacked_hist0104.png')
+    plt.show()
